@@ -6,16 +6,19 @@ import {
     PhotographIcon,
     SearchCircleIcon
 } from '@heroicons/react/outline'
+import { useSession } from 'next-auth/react'
 
 function Tweetbox() {
 
     const [input, setInput] = useState<string>('')
+    const { data: session} = useSession();
+    
 
   return (
     <div className='flex space-x-2 p-5'>
         <img 
         className='mt-4 h-14 w-14 rounded-full object-cover' 
-        src="https://links.papareact.com/gll" 
+        src={session?.user?.image ||"https://links.papareact.com/gll" }
         alt="" 
         />
 
@@ -37,8 +40,12 @@ function Tweetbox() {
                         <LocationMarkerIcon className='h-5 w-5'/>
                     </div>
                     
-                    <button disabled={!input} className='text-white bg-twitter px-5 py-2 font-bold rounded-full
-                    disabled:opacity-50'>Tweet</button>
+                    <button 
+                    disabled={!input || !session } 
+                    className='text-white bg-twitter px-5 py-2 font-bold rounded-full
+                    disabled:opacity-50'>
+                        Tweet
+                    </button>
                 </div>
             </form>
         </div>
