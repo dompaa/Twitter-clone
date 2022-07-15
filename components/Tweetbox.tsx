@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react'
+import React, { Dispatch, SetStateAction, useRef, useState } from 'react'
 import {
     CalendarIcon,
     EmojiHappyIcon,
@@ -7,8 +7,15 @@ import {
     SearchCircleIcon
 } from '@heroicons/react/outline'
 import { useSession } from 'next-auth/react'
+import { Tweet, TweetBody } from '../typings'
+import { fetchTweets } from '../utils/fetchTweets'
+import toast from 'react-hot-toast'
 
-function Tweetbox() {
+interface Props {
+    setTweets: Dispatch<SetStateAction<Tweet[]>>
+}
+
+function Tweetbox({ setTweets}: Props) {
 
     const [input, setInput] = useState<string>('')
     const [image, setImage] = useState<string>('')
@@ -20,7 +27,7 @@ function Tweetbox() {
     const [imageUrlBoxIsOpen, setImageUrlBoxIsOpen] = useState<boolean>(false)
 
     const addImageToTweet = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
-        //prevent the page from refreshing
+        //prevent the page from refreshing because we are in form, so no refresh is needed
         e.preventDefault();
 
         if(!imageInputRef.current?.value)
@@ -29,6 +36,43 @@ function Tweetbox() {
         setImage(imageInputRef.current.value)
         imageInputRef.current.value ='',
         setImageUrlBoxIsOpen(false);
+    }
+
+    const postTweet = async () => {
+        const tweetInfo: TweetBody = {
+            text: input,
+            username: session?.user?.name || 'Unknown user',
+            profileImg: session?.user?.image || 'https://links.papareact.com/gll',
+            image: image,
+        }
+
+        //stringify, cannot send the javascript objects online before stringify
+        // the block will mutate the tweet
+        const result = await fetch(`/api/addTweet`,{
+            body: JSON.stringify(tweetInfo),
+            method: 'POST',
+        }) 
+
+        const json = await result.json();
+
+        const newTweets = await fetchTweets() 
+        setTweets(newTweets)
+
+        toast('Tweet posted', {
+            icon: '🚀'
+        })
+        return json;
+
+    }
+
+    const handleSubmit = (e: React.MouseEvent<HTMLButtonElement, MouseEvent> ) => {
+        e.preventDefault()
+
+        postTweet();
+
+        setInput('')
+        setImage('')
+        setImageUrlBoxIsOpen(false)
     }
 
   return (
@@ -58,6 +102,7 @@ function Tweetbox() {
                     </div>
                     
                     <button 
+                    onClick={handleSubmit}
                     disabled={!input || !session } 
                     className='text-white bg-twitter px-5 py-2 font-bold rounded-full
                     disabled:opacity-50'>
