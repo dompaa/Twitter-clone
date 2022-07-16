@@ -26,7 +26,8 @@ function Tweetbox({ setTweets}: Props) {
     const { data: session} = useSession();
     const [imageUrlBoxIsOpen, setImageUrlBoxIsOpen] = useState<boolean>(false)
 
-    const addImageToTweet = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+    const addImageToTweet = (
+        e: React.MouseEvent<HTMLButtonElement, globalThis.MouseEvent>) => {
         //prevent the page from refreshing because we are in form, so no refresh is needed
         e.preventDefault();
 
