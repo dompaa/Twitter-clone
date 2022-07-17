@@ -35,7 +35,8 @@ function Tweet({tweet}: Props) {
 //  console.log(comments);
   
 const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-  
+  e.preventDefault();
+    
 }
 
 
