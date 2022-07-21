@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { Comment, Tweet } from '../typings'
+import { Comment, CommentBody, Tweet } from '../typings'
 import TimeAgo from 'react-timeago'
 import {
   ChatAlt2Icon,
@@ -9,6 +9,7 @@ import {
 } from '@heroicons/react/outline'
 import { fetchComments } from '../utils/fetchComments'
 import { useSession } from 'next-auth/react'
+import toast from 'react-hot-toast'
 
 interface Props {
     tweet: Tweet
@@ -34,11 +35,33 @@ function Tweet({tweet}: Props) {
 
 //  console.log(comments);
   
-const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
   e.preventDefault();
-    
-}
 
+  const commentToast = toast.loading('Posting Comment...')
+
+    // Comment logic
+    const comment: CommentBody = {
+      comment: input,
+      tweetId: tweet._id,
+      username: session?.user?.name || 'Unknown User',
+      profileImg: session?.user?.image || 'https://links.papareact.com/gll',
+  }
+
+  const result = await fetch(`/api/addComment`, {
+    body: JSON.stringify(comment),
+    method: 'POST',
+  })
+
+  console.log('WOOHOO we made it', result)
+  toast.success('Comment Posted!', {
+    id: commentToast,
+  })
+
+  setInput('')
+  setCommentBoxVisible(false)
+  refreshComments()
+  }
 
 
   return (
